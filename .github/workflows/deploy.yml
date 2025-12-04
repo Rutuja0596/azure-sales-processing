@@ -1,0 +1,64 @@
+name: Deploy Azure Sales Processing
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual trigger
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: pip install pandas pytest
+    
+    - name: Run validation tests
+      run: python scripts/simulate.py
+    
+    - name: Validate Bicep
+      run: |
+        az bicep build --file infrastructure/main.bicep
+        echo "✅ Bicep validation passed"
+    
+  simulate-azure-deploy:
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Azure Login with OpenID Connect
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    
+    - name: Simulate Azure Deployment
+      run: |
+        echo "=== SIMULATED AZURE DEPLOYMENT ==="
+        echo "1. Creating Resource Group: sales-processing-rg"
+        echo "2. Deploying Storage Account..."
+        echo "3. Deploying Data Factory..."
+        echo "4. Deploying Function App..."
+        echo "5. Deploying Logic App..."
+        echo "6. Setting up Monitoring..."
+        echo "=== DEPLOYMENT COMPLETE ==="
+        
+    - name: Upload Simulation Logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-logs
+        path: |
+          azure_monitor.log
+          deployment_output.txt
