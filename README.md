@@ -1,6 +1,6 @@
 # azure-sales-processing
 
-`azure-sales-processing/
+```azure-sales-processing/
 ├── .github/workflows/
 │   └── deploy.yml           # GitHub Actions workflow
 ├── infrastructure/
@@ -20,4 +20,4 @@
 │   ├── architecture.md
 │   └── deployment.md
 ├── README.md
-└── requirements.txt`
+└── requirements.txt```
